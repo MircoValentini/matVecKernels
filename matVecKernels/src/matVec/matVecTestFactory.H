@@ -81,13 +81,13 @@ class matVecTestFactory
     kernelName2kernelId(  )
     {
       m_kid = 255;
-      if ( strcmp( m_test, "COO_COO"  ) == 0 )                { m_kid=0;  }; /* 0  */
-      if ( strcmp( m_test, "CSC_CSR"  ) == 0 )                { m_kid=1;  }; /* 1  */
-      if ( strncmp( m_test, "BlockRowPerm", 12  ) == 0 )      { m_kid=2;  }; /* 2  */
-      if ( strncmp( m_test, "BlockRowPermCC", 14  ) == 0 )    { m_kid=3;  }; /* 2  */
-      if ( strncmp( m_test, "BlockRowPerm_sELL", 17  ) == 0 ) { m_kid=4;  }; /* 2  */
-      if ( strcmp( m_test, "CSR_CSR"  ) == 0 )                { m_kid=5;  }; /* 3  */
-      if ( strcmp( m_test, "CSR"      ) == 0 )                { m_kid=6;  }; /* 4  */
+      if ( strcmp( m_test, "COO_COO"  ) == 0 )              { m_kid=0;  }; /* 0  */
+      if ( strcmp( m_test, "CSC_CSR"  ) == 0 )              { m_kid=1;  }; /* 1  */
+      if ( strncmp( m_test, "BlockRowPerm", 12  ) == 0 )    { m_kid=2;  }; /* 2  */
+      if ( strncmp( m_test, "BlockRowPermCC", 14  ) == 0 )  { m_kid=3;  }; /* 2  */
+      if ( strncmp( m_test, "BlockRowPermELL", 15  ) == 0 ) { m_kid=4;  }; /* 2  */
+      if ( strcmp( m_test, "CSR_CSR"  ) == 0 )              { m_kid=5;  }; /* 3  */
+      if ( strcmp( m_test, "CSR"      ) == 0 )              { m_kid=6;  }; /* 4  */
       bool check;
       if ( m_kid == 255 )
       {
@@ -216,13 +216,6 @@ class matVecTestFactory
         }
         case (4):
         {
-          idx_k nBlks = 10;
-          int l = strlen(m_test);
-          if ( l > 17 )
-          {
-            const char* tmp = &m_test[18];
-            nBlks = atoi( tmp );
-          };
           m_matVecTest = 
           new BlockRowPerm_sELL_IO
           (
@@ -231,7 +224,7 @@ class matVecTestFactory
             m_prefix,
             m_index,
             m_tolerance,
-            nBlks
+            m_test
           );
           m_allocated = true;
           break;

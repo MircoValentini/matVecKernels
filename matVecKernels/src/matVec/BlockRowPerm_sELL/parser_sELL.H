@@ -1,38 +1,20 @@
+#ifndef __PARSE_ELL_H__
+#define __PARSE_ELL_H__
+
+
+/*
+ * System include
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <vector>
 
-#define __enter_function__()
-#define __exit_function__()
-
-typedef unsigned int idx_k;
-
-/**
- * @brief enumerator for cell sorting algorithms
- *
+/*
+ * Local includes
  */
-enum class cellSortingStrategy
-{
-  bandwidth,
-  antiBandwidth,
-  sortingIndex,
-  last
-};
-
-
-/**
- * @brief enumerator for memory sorting algorithms
- *
- */
-enum class memorySortingStrategy
-{
-  standard,
-  ell,
-  last
-};
-
+#include "BlkRowPerm_sELL.H"
 
 
 class parseELL
@@ -1943,32 +1925,7 @@ class parseELL
       return(parserSuccess);
     };
 
-    idx_k kernelFlavour() const 
-    {
-      return(m_kernelFlavour);
-    };
-
-    blockConstructionKind blockConstructionKind() const 
-    {
-      blockConstructionKind tmp;
-      switch (m_kernelFlavour)
-      {
-        case (1);
-        {
-          tmp = blockConstructionKind::oneParameter;
-        }
-        case (2);
-        {
-          tmp = blockConstructionKind::twoParameters;
-        }
-        default;
-        {
-          printf( "ERROR: wrong kernel flavour\n" );
-          abort();
-        }
-      }
-      return(tmp);
-    };
+    idx_k kernelFlavour() const { return(m_kernelFlavour); };
 
     memorySortingStrategy memorySorting() const { return(m_memorySortingStrategy); };
     cellSortingStrategy   cellSorting()   const { return(m_cellSortingStrategy); };
@@ -1983,7 +1940,32 @@ class parseELL
     const char* lastErrorMsg()  const { return(m_errMsg); };
     const char* kernelName()    const { return(m_kernelName); };
 
-    const char* configurationString() const
+    blockConstructionKind getBlockConstructionKind() const 
+    {
+      blockConstructionKind tmp;
+      switch (m_kernelFlavour)
+      {
+        case (1):
+        {
+          tmp = blockConstructionKind::oneParameter;
+          break;
+        }
+        case (2):
+        {
+          tmp = blockConstructionKind::twoParameters;
+          break;
+        }
+        default:
+        {
+          printf( "ERROR: wrong kernel flavour\n" );
+          abort();
+        }
+      }
+      return(tmp);
+    };
+
+
+    char* configurationString() const
     {
       char sortCellName[1024];
       char sortMemName[1024];
@@ -2056,48 +2038,4 @@ class parseELL
 
 };
 
-int
-main()
-{
-
-  const char* name[]=
-  {
-   "BlockRowPermELL<1>( 8, 10,       \"bandwidth\",     \"ell\"      )",
-   "BlockRowPermELL<1>( 8, 10,       \"bandwidth\",     \"standard\" )",
-   "BlockRowPermELL<1>( 8, 10,       \"antiBandwidth\", \"ell\"      )",
-   "BlockRowPermELL<1>( 8, 10,       \"antiBandwidth\", \"standard\" )",
-   "BlockRowPermELL<1>( 8, 10,       \"sortingIndex\",  \"ell\"      )",
-   "BlockRowPermELL<1>( 8, 10,       \"sortingIndex\",  \"standard\" )",
-   "BlockRowPermELL<2>( 8, 1.5, 0.4, \"bandwidth\",     \"ell\"      )",
-   "BlockRowPermELL<2>( 8, 3,   .2,  \"bandwidth\",     \"standard\" )",
-   "BlockRowPermELL<2>( 8, .8,  1.0, \"antiBandwidth\", \"ell\"      )",
-   "BlockRowPermELL<2>( 8, 3,   1,   \"antiBandwidth\", \"standard\" )",
-   "BlockRowPermELL<2>( 8, 1.0, 1.0, \"sortingIndex\",  \"ell\"      )",
-   "BlockRowPermELL<2>( 8, 3.0, 0.2, \"sortingIndex\",  \"standard\" )",
-  };
-
-  parseELL par;
-
-
-  for ( idx_k i=0; i<12; i++ )
-  {
-    printf( "Parsing: %s\n", name[i] );
-    par.readConfiguration( name[i], false );
-  }
-
-  printf( "last parser status %d\n", par.lastParserStatus() );
-
-  if ( par.lastParserStatus() == false )
-  {
-    printf( "%s\n", par.lastErrorMsg() );
-    printf( "%d\n", par.lastErrorLine() );
-    printf( "%d\n", par.lastErrorIdx() );
-  }
-  else
-  {
-    printf( "%s\n", par.configurationString() );
-  }
-
-  /* Exit point */
-  return(0);
-};
+#endif

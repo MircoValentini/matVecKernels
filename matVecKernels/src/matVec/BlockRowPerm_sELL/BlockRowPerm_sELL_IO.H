@@ -23,7 +23,7 @@
 #include "unitTestMatVec_IO.H"
 #include "BlkRowPerm_sELL.H"
 #include "blockCompressor.H"
-
+#include "parser_sELL.H"
 
 /**
  * Include the kernels
@@ -37,6 +37,8 @@ class BlockRowPerm_sELL_IO:
   public unitTestMatVec
 {
   private:
+
+    parseELL m_parser;
 
     blockRowPerm_sELL* m_permutation;
     blockCompressor*   m_compressor;
@@ -69,6 +71,83 @@ class BlockRowPerm_sELL_IO:
 
 
   public:
+
+    /**
+     * @brief Constructor for the IO object given all the parameters
+     *
+     * The name of the unit test (the searched file ) will be generated as follows:
+     *
+     *  UTname = UTdir/${name}/${prefix}_${name}_${%6.6d-index}.h5
+     *
+     * @param[in] outputFile           name of the output file
+     * @param[in] UTdir                direcotry where the unit tests are stored
+     * @param[in] prefix               prefix to be applied to the neame of the unit tests
+     * @param[in] index                index of hte unit thest
+     * @param[in] tolerance            tolerance used for the check
+     * @param[in] configurationString  number of blocks
+     */
+    BlockRowPerm_sELL_IO
+    (
+      const char* outputFile,
+      const char* UTdir,
+      const char* prefix,
+      idx_k       index,
+      double      tolerance,
+      const char* configurationString
+    ):
+      // Inheritance
+      unitTestMatVec(outputFile,UTdir,prefix,index,tolerance)
+      // Members
+     ,m_permutation(nullptr)
+     ,m_compressor(nullptr)
+     ,m_AVXsize(8)
+     ,m_nBlks(0)
+     ,m_scale(0.0)
+     ,m_limitScale(0.0)
+     ,m_name(nullptr)
+     ,m_blockConstructionKind(blockConstructionKind::oneParameter)
+     ,m_cellSortingStrategy(cellSortingStrategy::bandwidth)
+     ,m_memorySortingStrategy(memorySortingStrategy::ell)
+     ,m_pOwnerInp(nullptr)
+     ,m_pNeighInp(nullptr)
+     ,m_pPsiInp(nullptr)
+     ,m_pApsiInp(nullptr)
+     ,m_pUpperInp(nullptr)
+     ,m_pLowerInp(nullptr)
+     ,m_locAllocatedInput(false)
+     ,m_pOwnerOut(nullptr)
+     ,m_pNeighOut(nullptr)
+     ,m_pPsiOut(nullptr)
+     ,m_pApsiOut(nullptr)
+     ,m_pUpperOut(nullptr)
+     ,m_pLowerOut(nullptr)
+     ,m_locAllocatedOutput(false)
+    {
+      /* Construct the name o f the kernel */
+      // printf( "Configuration string :: %s\n", configurationString );
+      m_parser.readConfiguration( configurationString, false );
+      if ( m_parser.lastParserStatus() == false )
+      {
+        printf( "%s\n", m_parser.lastErrorMsg() );
+        printf( "%d\n", m_parser.lastErrorLine() );
+        printf( "%d\n", m_parser.lastErrorIdx() );
+        abort();
+      }
+      else
+      {
+        
+        m_blockConstructionKind = m_parser.getBlockConstructionKind();
+        m_AVXsize               = m_parser.AVXsize();
+        m_nBlks                 = m_parser.nBlocks();
+        m_scale                 = m_parser.scaleFactor();
+        m_limitScale            = m_parser.limitScaleFactor();
+        m_cellSortingStrategy   = m_parser.cellSorting();
+        m_memorySortingStrategy = m_parser.memorySorting();
+        m_name                  = m_parser.configurationString();
+      }
+      /* Exit point */
+      return;
+    };
 
     /**
      * @brief Constructor for the IO object given all the parameters

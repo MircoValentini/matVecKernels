@@ -51,7 +51,7 @@ HEADERS= \
 ./src/matVec/BlockRowPerm_sELL/BlockRowPerm_sELL_kernels.H \
 ./src/matVec/BlockRowPerm_sELL/BlockRowPerm_sELL_IO.H \
 ./src/matVec/BlockRowPerm_sELL/BlkRowPerm_sELL.H \
-./src/matVec/BlockRowPerm_sELL/spmv.H \
+./src/matVec/BlockRowPerm_sELL/parser_sELL.H \
 ./src/matVec/COO_COO/COO_COO_IO.H \
 ./src/matVec/COO_COO/COO_COO_kernels.H \
 ./src/matVec/matVecTestFactory.H \

@@ -1100,7 +1100,7 @@ public:
     computeMaxBandwidth();
     computeLineAntiBandWidth();
     computeUpperBandwidth();
-    printBandwidth();
+    // printBandwidth();
     // computeBandwidthBLocking( 2.0, 0.2, true );
     // Exit point
     return;
