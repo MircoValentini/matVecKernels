@@ -406,7 +406,7 @@ class BlockRowPerm_IO:
      * @param[in,out] profileTime time spent in the computation
      */
     void
-    run
+    warmup
     (
       timeProfile& profileTime
     )
@@ -433,6 +433,106 @@ class BlockRowPerm_IO:
         m_pPsiInp,
         m_pApsiInp
       );
+#ifdef __DEBUG_VERBOSE__
+      FILE* fid;
+      /* Save  the permuted vectors */
+      fid = fopen( "pAx.dat", "w" );
+      for ( idx_k i=0; i<m_nCellsInp_CPU; ++i )
+        {
+          fprintf( fid, "%lf\n", m_pApsiInp[i] );
+        };
+      fclose(fid);
+      fid = fopen( "px.dat", "w" );
+      for ( idx_k i=0; i<m_nCellsInp_CPU; ++i )
+        {
+          fprintf( fid, "%lf\n", m_pPsiInp[i] );
+        };
+      fclose(fid);
+      // --------------------------------------------
+      fid = fopen( "Ax.dat", "w" );
+      for ( idx_k i=0; i<m_nCellsInp_CPU; ++i )
+        {
+          fprintf( fid, "%lf\n", m_ApsiOut_CPU[i] );
+        };
+      fclose(fid);
+      fid = fopen( "Ax0.dat", "w" );
+      for ( idx_k i=0; i<m_nCellsInp_CPU; ++i )
+        {
+          fprintf( fid, "%lf\n", m_ApsiInp_CPU[i] );
+        };
+      fclose(fid);
+      fid = fopen( "x.dat", "w" );
+      for ( idx_k i=0; i<m_nCellsInp_CPU; ++i )
+        {
+          fprintf( fid, "%lf\n", m_psiInp_CPU[i] );
+        };
+      fclose(fid);
+#endif
+   //   m_permutation->Ax( m_pApsiInp, m_ApsiInp_CPU );
+#endif
+
+/* Call the CUDA kernel */
+#if defined( __TEST_NATIVE_CUDA__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+/* Call the OPEN_ACC kernel */
+#if defined( __TEST_OPEN_ACC__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+    /* Call the OPEN_MP kernel */
+#if  defined( __TEST_OPEN_MP__ ) && !defined( __DRY_RUN__ )
+
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+      /* Record the profiling time */
+      m_profiler.toc( profileTime );
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief Run the kernels 
+     *
+     * @param[in,out] profileTime time spent in the computation
+     */
+    void
+    race
+    (
+      timeProfile& profileTime,
+      idx_k        numberOfRepetitions
+    )
+    {
+      /* Start the profiling */
+      m_profiler.tic();
+
+#ifdef __DEBUG_VERBOSE__
+      m_permutation->writeOctave();
+      writeOctave();
+#endif
+      /* Call the kernel */
+#if defined( __TEST_CPU__ ) && !defined( __DRY_RUN__ )
+      for ( idx_k i=0; i<numberOfRepetitions; i++ )
+      {
+        matVec_BlockRowPerm_CPU
+        (
+          m_nCellsInp_CPU,
+          m_permutation->nSubBlocks(),
+          m_blockStart,
+          m_blockKind,
+          m_pOwnerInp,
+          m_pNeighInp,
+          m_pUpperOut,
+          m_pLowerOut,
+          m_pPsiInp,
+          m_pApsiInp
+        );
+      }
 #ifdef __DEBUG_VERBOSE__
       FILE* fid;
       /* Save  the permuted vectors */

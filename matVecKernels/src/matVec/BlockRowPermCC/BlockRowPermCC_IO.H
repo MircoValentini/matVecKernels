@@ -675,7 +675,7 @@ class BlockRowPermCC_IO:
      * @param[in,out] profileTime time spent in the computation
      */
     void
-    run
+    warmup
     (
       timeProfile& profileTime
     )
@@ -698,6 +698,67 @@ class BlockRowPermCC_IO:
         m_pPsiInp,
         m_pApsiInp
       );
+#endif
+
+/* Call the CUDA kernel */
+#if defined( __TEST_NATIVE_CUDA__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+/* Call the OPEN_ACC kernel */
+#if defined( __TEST_OPEN_ACC__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+    /* Call the OPEN_MP kernel */
+#if  defined( __TEST_OPEN_MP__ ) && !defined( __DRY_RUN__ )
+
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+      /* Record the profiling time */
+      m_profiler.toc( profileTime );
+      /* Exit point */
+      return;
+    };
+
+
+
+    /**
+     * @brief Run the kernels 
+     *
+     * @param[in,out] profileTime time spent in the computation
+     */
+    void
+    race
+    (
+      timeProfile& profileTime,
+      idx_k        numberOfRepetitions
+    )
+    {
+      /* Start the profiling */
+      m_profiler.tic();
+
+      /* Call the kernel */
+#if defined( __TEST_CPU__ ) && !defined( __DRY_RUN__ )
+      for ( idx_k i=0; i<numberOfRepetitions; ++i )
+      {
+        matVec_BlockRowPermCC_CPU
+        (
+          m_nCellsInp_CPU,
+          m_permutation->nSubBlocks(),
+          m_blockStart,
+          m_blkDeltaCol,
+          m_blockKind,
+          m_dNeighInp,
+          m_pUpperOut,
+          m_pLowerOut,
+          m_pPsiInp,
+          m_pApsiInp
+        );
+      }
 #endif
 
 /* Call the CUDA kernel */

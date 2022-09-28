@@ -10,7 +10,7 @@
 
 #
 # Load the environment needed to run the job
-exe=/m100_work/ExaF_prod22/testsSoftware/matVecKernels/bin/test.x
+exe=/m100_work/ExaF_prod22/testsSoftware/matVecKernels/bin/matVecKernels.x
 cd /m100_work/ExaF_prod22/unitTests/matVecData/${1}
 
 #

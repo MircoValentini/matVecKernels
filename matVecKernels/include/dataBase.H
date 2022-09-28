@@ -267,7 +267,7 @@ parse
       memset( m_buffer, 0, 4096 );
       sprintf
       (
-        m_buffer, "CREATE TABLE profiling (date text, machine text, compiler text, flags text, hostname text, prefix text, isRCM int, nRows int, procID int, kernel text, kernelFlavour text, caseIndex int, mpiIndex int, mpiSize int, bandWidth double, jumpParam double, ElapsedTime double, ClockTime double, CudaTime double)"
+        m_buffer, "CREATE TABLE IF NOT EXISTS profiling (date text, machine text, compiler text, flags text, hostname text, prefix text, isRCM int, nRows int, procID int, kernel text, kernelFlavour text, caseIndex int, mpiIndex int, mpiSize int, nRepetitions int, bandWidth double, jumpParam double, warmupElapsedTime double, warmupClockTime double, warmupCudaTime double, raceElapsedTime double, raceClockTime double, raceCudaTime double)"
       );
       // Try to create the table
       int rc = 
@@ -282,9 +282,10 @@ parse
       // Error handling
       if (rc != SQLITE_OK )
       {
-        // fprintf(stderr, "SQL warning: %s\n", m_errmsg);
+        fprintf(stderr, "SQL warning: %s\n", m_errmsg);
         sqlite3_free(m_errmsg);
-        // sqlite3_close(m_db);
+        sqlite3_close(m_db);
+        abort();
       };
       // Reset buffer
       memset( m_buffer, 0, 4096 );
@@ -302,9 +303,13 @@ parse
     (
       idx_k        mpiIndex,
       idx_k        mpiSize,
-      double       executionTime,
-      double       clockTime,
-      double       cudaTime
+      idx_k        nRepetitions,
+      double       warmup_executionTime,
+      double       warmup_clockTime,
+      double       warmup_cudaTime,
+      double       race_executionTime,
+      double       race_clockTime,
+      double       race_cudaTime
     )
     {
       // Extract info from the prefix
@@ -325,26 +330,30 @@ parse
       // Crete the command
       sprintf
       (
-        m_buffer, "INSERT INTO profiling VALUES (\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%6.6d,%6.6d,%6.6d,\'%s\',\'%s\',%6.6d,%6.6d,%6.6d,%30.20lf,%30.20lf,%30.20lf,%30.20lf,%30.20lf)",
+        m_buffer, "INSERT INTO profiling VALUES (\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%6.6d,%6.6d,%6.6d,\'%s\',\'%s\',%6.6d,%6.6d,%6.6d,%6.6d,%30.20lf,%30.20lf,%30.20lf,%30.20lf,%30.20lf,%30.20lf,%30.20lf,%30.20lf)",
         m_date,
         m_machine,
         m_compiler,
         m_flavour,
-	hostname,
+        hostname,
         pName,
-	isRCM,
-	nRows,
-	pid,
+        isRCM,
+        nRows,
+        pid,
         m_uT.kernel(),
         m_uT.kernelFlavour(),
         m_uT.index(),
         mpiIndex,
         mpiSize,
-	bandWidth,
-	jumpParam,
-        executionTime,
-        clockTime,
-        cudaTime
+        nRepetitions,
+        bandWidth,
+        jumpParam,
+        warmup_executionTime,
+        warmup_clockTime,
+        warmup_cudaTime,
+        race_executionTime,
+        race_clockTime,
+        race_cudaTime
       );
       // Run the insertion command
       int rc = 

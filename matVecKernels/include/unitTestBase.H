@@ -145,8 +145,8 @@ class unitTestBase
     /*
      * @brief run the testcase and measure the time
      */
-    virtual void run( timeProfile& profileTime ) = 0;
-
+    virtual void warmup( timeProfile& profileTime ) = 0;
+    virtual void race  ( timeProfile& profileTime, idx_k numberOfRepetitions ) = 0;
 
     /*
      * @brief check the result

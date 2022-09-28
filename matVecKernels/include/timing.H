@@ -147,6 +147,38 @@ class timeProfile
 
 
     /**
+     * @brief Destructor of the class
+     */
+    void
+    print
+    (
+      idx_k nRepetitions
+    )
+    {
+      /* Print timing data */
+#if defined(__TEST_CPU__)
+      printf( " Execution time (CPU): %10.6lf [s], Clock time: %10.6lf [s]\n", 
+              m_dtime/nRepetitions, m_dclock/nRepetitions );
+#endif
+#if defined(__TEST_NATIVE_CUDA__)
+      printf( " Execution time (CUDA): %10.6lf [s], Clock time: %10.6lf [s], Cuda time: %10.6f [s]\n", 
+              m_dtime/nRepetitions, m_dclock/nRepetitions, m_dcudaTime/1000/nRepetitions );
+#endif
+#if defined(__TEST_OPEN_ACC__)
+      printf( " Execution time (OPEN_ACC): %10.6lf [s], Clock time: %10.6lf [s], Cuda time: %10.6f [s]\n", 
+              m_dtime/nRepetitions, m_dclock/nRepetitions, m_dcudaTime/1000/nRepetitions );
+#endif
+#if defined(__TEST_OPEN_MP__)
+      printf( " Execution time (OPEN_MP): %10.6lf [s], Clock time: %10.6lf [s]\n", 
+              m_dtime/nRepetitions, m_dclock/nRepetitions );
+#endif
+      /* Exit point */
+      return;
+    };
+
+
+
+    /**
      * @brief Function used to print the timing measures with the name 
      */
     void

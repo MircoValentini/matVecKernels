@@ -59,6 +59,7 @@ main
 #endif
 
     // Profiling data
+    timeProfile profileCheckTime;
     timeProfile profileWarmupTime;
     timeProfile profileRaceTime;
 
@@ -87,7 +88,7 @@ main
     ut->copyToDevice();
 
     // Run the computational kernel
-    ut->run( profileWarmupTime );
+    ut->warmup( profileWarmupTime );
 /*
     ut->warmup( profileWarmupTime );
     ut->race( profileRaceTime, testFactory.nLaps() );
@@ -103,23 +104,44 @@ main
 
     if ( check )
     {
+
+      // Rerun the warmup in ordr to fix the cache
+      ut->warmup( profileCheckTime );
+
+      // Run the race 
+      ut->race( profileRaceTime, testFactory.numberOfRepetitions() );
+
+
 #ifdef __MPI__
-      double* executionTime = nullptr;
-      double* clockTime     = nullptr;
-      double* cudaTime      = nullptr;
+      double* warmup_executionTime = nullptr;
+      double* warmup_clockTime     = nullptr;
+      double* warmup_cudaTime      = nullptr;
+      double* race_executionTime = nullptr;
+      double* race_clockTime     = nullptr;
+      double* race_cudaTime      = nullptr;
       double tmp;
       if ( world_rank == 0 )
       {
-        executionTime = (double*)malloc( sizeof(double)*world_size );
-        clockTime     = (double*)malloc( sizeof(double)*world_size );
-        cudaTime      = (double*)malloc( sizeof(double)*world_size );
+        warmup_executionTime = (double*)malloc( sizeof(double)*world_size );
+        warmup_clockTime     = (double*)malloc( sizeof(double)*world_size );
+        warmup_cudaTime      = (double*)malloc( sizeof(double)*world_size );
+        race_executionTime = (double*)malloc( sizeof(double)*world_size );
+        race_clockTime     = (double*)malloc( sizeof(double)*world_size );
+        race_cudaTime      = (double*)malloc( sizeof(double)*world_size );
       }
       tmp=profileWarmupTime.executionTime();
-      MPI_Gather( &tmp, 1, MPI_DOUBLE, executionTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Gather( &tmp, 1, MPI_DOUBLE, warmup_executionTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       tmp=profileWarmupTime.clockTime();
-      MPI_Gather( &tmp, 1, MPI_DOUBLE, clockTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Gather( &tmp, 1, MPI_DOUBLE, warmup_clockTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       tmp=profileWarmupTime.cudaTime();
-      MPI_Gather( &tmp, 1, MPI_DOUBLE, cudaTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Gather( &tmp, 1, MPI_DOUBLE, warmup_cudaTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      tmp=profileRaceTime.executionTime()/testFactory.numberOfRepetitions();
+      MPI_Gather( &tmp, 1, MPI_DOUBLE, race_executionTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      tmp=profileRaceTime.clockTime()/testFactory.numberOfRepetitions();
+      MPI_Gather( &tmp, 1, MPI_DOUBLE, race_clockTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      tmp=profileRaceTime.cudaTime()/testFactory.numberOfRepetitions();
+      MPI_Gather( &tmp, 1, MPI_DOUBLE, race_cudaTime, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
       if ( world_rank == 0 )
       {
         // Open the database
@@ -128,15 +150,29 @@ main
         OutDB.createTable();
         for ( int i=0; i<world_size; ++i )
         {
-          OutDB.write( i, world_size, executionTime[i], clockTime[i], cudaTime[i]  );
+          OutDB.write
+          (
+            i,
+            world_size,
+            testFactory.numberOfRepetitions(),
+            warmup_executionTime[i],
+            warmup_clockTime[i],
+            warmup_cudaTime[i],
+            race_executionTime[i],
+            race_clockTime[i],
+            race_cudaTime[i]
+          );
         }
         // printf( "confronto :: %lf - ", profileWarmupTime.executionTime() );
         // printf( "%lf\n", executionTime[0] );
         // Close the database
         OutDB.close();
-        free(executionTime);
-        free(clockTime);
-        free(cudaTime);
+        free(warmup_executionTime);
+        free(warmup_clockTime);
+        free(warmup_cudaTime);
+        free(race_executionTime);
+        free(race_clockTime);
+        free(race_cudaTime);
       }
 #else
       // Open the database
@@ -144,7 +180,18 @@ main
       // Create table
       OutDB.createTable();
       // Write data
-      OutDB.write( 0, 1, profileWarmupTime.executionTime(), profileWarmupTime.clockTime(), profileWarmupTime.cudaTime()  );
+      OutDB.write
+      (
+        0,
+        1,
+        testFactory.numberOfRepetitions(),
+        profileWarmupTime.executionTime(),
+        profileWarmupTime.clockTime(),
+        profileWarmupTime.cudaTime(),
+        profileRaceTime.executionTime(),
+        profileRaceTime.clockTime(),
+        profileRaceTime.cudaTime()
+      );
       // Close the database
       OutDB.close();
 #endif
@@ -153,13 +200,14 @@ main
     // Free the unit test
     ut->Free();
 
-    // Free the factory
-    testFactory.free();
-
     // Print the result of the tests
     if ( check )
     {
-      profileWarmupTime.print();
+      if ( testFactory.verbose() )
+      {
+        profileWarmupTime.print();
+        profileRaceTime.print( testFactory.numberOfRepetitions() );
+      }
     }
     else
     {
@@ -178,6 +226,8 @@ main
       abort();
     };
 
+    // Free the factory
+    testFactory.free();
 
 #ifdef __MPI__
     // Finalize the MPI environment.

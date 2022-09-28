@@ -43,11 +43,13 @@ class unitTestFactory
     const char*   m_testKind;
     const char*   m_outputFile;
     idx_k         m_index;
+    idx_k         m_nRepetitions;
     double        m_tolerance;
     unsigned char m_kid;
     /* Pointer to the test case*/
     unitTestBase* m_test;
     bool          m_allocated;
+    bool          m_verbose;
 
     /* 
      * Show the help for the unit tests
@@ -98,12 +100,14 @@ class unitTestFactory
      ,m_prefix("LDUSYSCOOmatVecCompOffDiagStageOneOutput")
      ,m_name("matVec")
      ,m_index(0)
+     ,m_nRepetitions(100)
      ,m_tolerance(0.0000000001)
      ,m_outputFile("test01.db")	
      ,m_kid(0)
      ,m_testKind("")
      ,m_test(nullptr)
      ,m_allocated(false)
+     ,m_verbose(false)
     {
 
       /**
@@ -111,12 +115,12 @@ class unitTestFactory
        */
       opterr = 0;
       int c;
-      bool verbose=false;
+      bool debug=false;
 
       /**
        * Parse command line arguments
        */
-      while ( (c = getopt (argc, argv, "n:d:p:i:t:k:o:vh")) != -1)
+      while ( (c = getopt (argc, argv, "n:d:p:i:r:t:k:o:vzh")) != -1)
       {
         /**
          * Loop over the input options
@@ -136,11 +140,11 @@ class unitTestFactory
             };
             break;
           }
-	case 'o':
-	  {
+        case 'o':
+          {
             *const_cast<char**>(&m_outputFile) = optarg;
             break;
-	  }
+          }
         /* Direcotry where the unit tests are saved */
         case 'd':
           {
@@ -165,6 +169,12 @@ class unitTestFactory
             m_index = atoi(optarg);
             break;
           }
+        /* Index of hte testcase */
+        case 'r':
+          {
+            m_nRepetitions = atoi(optarg);
+            break;
+          }
         /* Tolerance used to chekc (default 1.0E-12) */
         case 't':
           {
@@ -175,7 +185,12 @@ class unitTestFactory
         /* verbose to log the input data */
         case 'v':
           {
-            verbose=true;
+            m_verbose=true;
+            break;
+          }
+        case 'z':
+          {
+            debug=true;
             break;
           }
         case 'h':
@@ -188,7 +203,7 @@ class unitTestFactory
         };
       };
       /** Logging the input data */
-      if ( verbose )
+      if ( debug )
       {
         printf( " + Prefix    :: %s\n", m_prefix );
         printf( " + Name      :: %s\n", m_name   );
@@ -237,6 +252,13 @@ class unitTestFactory
       return(m_test);
     };
 
+
+    idx_k numberOfRepetitions() const
+    {
+      return( m_nRepetitions );
+    }
+
+    bool verbose() const { return(m_verbose); };
 
     /**
      * Free the unit test

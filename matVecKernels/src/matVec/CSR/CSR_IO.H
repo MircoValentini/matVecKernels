@@ -532,7 +532,7 @@ class CSR_IO:
      * @param[in,out] profileTime time spent in the computation
      */
     void
-    run
+    warmup
     (
       timeProfile& profileTime
     )
@@ -561,6 +561,130 @@ class CSR_IO:
       m_psiInp_CPU,
       m_ApsiInp_CPU
     );
+#endif
+
+/* Call the CUDA kernel */
+#if defined( __TEST_NATIVE_CUDA__ ) && !defined( __DRY_RUN__ )
+      matVec_CSR_nativeCUDA<<<(2*m_nInternalFacesInp_CPU*__N_BLOCKS__+255)/256, 256>>>
+      (
+        m_nCellsInp_CPU,
+        m_nFacesInp_CPU,
+        m_nInternalFacesInp_CPU,
+        m_cellsStrideInp_CPU,
+        m_facesStrideInp_CPU,
+        m_iCompInp_CPU,
+        m_owner_Device,
+        m_neigh_Device,
+        m_rowStart_Device,
+        m_rowIdx_Device,
+        m_colIdx_Device,
+        m_prowStart_Device,
+        m_upper_Device,
+        m_lower_Device,
+        m_values_Device,
+        m_psi_Device,
+        m_Apsi_Device
+      );
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+/* Call the OPEN_ACC kernel */
+#if defined( __TEST_OPEN_ACC__ ) && !defined( __DRY_RUN__ )
+      matVec_CSR_openACC
+      (
+        m_nCellsInp_CPU,
+        m_nFacesInp_CPU,
+        m_nInternalFacesInp_CPU,
+        m_cellsStrideInp_CPU,
+        m_facesStrideInp_CPU,
+        m_iCompInp_CPU,
+        m_owner_Device,
+        m_neigh_Device,
+        m_rowStart_Device,
+        m_rowIdx_Device,
+        m_colIdx_Device,
+        m_prowStart_Device,
+        m_upper_Device,
+        m_lower_Device,
+        m_values_Device,
+        m_psi_Device,
+        m_Apsi_Device      );
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+    /* Call the OPEN_MP kernel */
+#if  defined( __TEST_OPEN_MP__ ) && !defined( __DRY_RUN__ )
+      matVec_CSR_openMP
+      (
+        m_nCellsInp_CPU,
+        m_nFacesInp_CPU,
+        m_nInternalFacesInp_CPU,
+        m_cellsStrideInp_CPU,
+        m_facesStrideInp_CPU,
+        m_iComp_Device,
+        m_owner_Device,
+        m_neigh_Device,
+        m_rowStart_Device,
+        m_rowIdx_Device,
+        m_colIdx_Device,
+        m_prowStart_Device,
+        m_upper_Device,
+        m_lower_Device,
+        m_values_Device,
+        m_psi_Device,
+        m_Apsi_Device
+      );
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+      /* Record the profiling time */
+      m_profiler.toc( profileTime );
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief Run the kernels 
+     *
+     * @param[in,out] profileTime time spent in the computation
+     */
+    void
+    race
+    (
+      timeProfile& profileTime,
+      idx_k        numberOfRepetitions
+    )
+    {
+      /* Start the profiling */
+      m_profiler.tic();
+      /* Call the kernel */
+#if defined( __TEST_CPU__ ) && !defined( __DRY_RUN__ )
+      for ( idx_k i=0; i<numberOfRepetitions; ++i )
+      {
+        matVec_CSR_CPU
+        (
+          m_nCellsInp_CPU,
+          m_nFacesInp_CPU,
+          m_nInternalFacesInp_CPU,
+          m_cellsStrideInp_CPU,
+          m_facesStrideInp_CPU,
+          m_iCompInp_CPU,
+          m_ownerInp_CPU,
+          m_neighInp_CPU,
+          m_rowStartInp_CPU,
+          m_rowIdxInp_CPU,
+          m_colIdxInp_CPU,
+          m_prowStartInp_CPU,
+          m_upperInp_CPU,
+          m_lowerInp_CPU,
+          m_valuesInp_CPU,
+          m_psiInp_CPU,
+          m_ApsiInp_CPU
+        );
+      }
 #endif
 
 /* Call the CUDA kernel */
