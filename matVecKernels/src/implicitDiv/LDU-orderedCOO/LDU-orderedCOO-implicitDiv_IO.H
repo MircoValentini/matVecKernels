@@ -1,0 +1,365 @@
+/*
+ * @file LDUorderedCOOimplicitDiv_IO.H
+ *
+ * @brief Definition of the routines and data to be used to test the 
+ * LDUSYSCOOmatVecCompOffDiagStageOneOutput kernel
+ *
+ *  @date   18/Giu/2022
+ *  @author Mirco Valentini
+ */
+
+
+#ifndef __LDU_ORDERED_COO_IMPLICIT_DIV_IO_H__
+#define __LDU_ORDERED_COO_IMPLICIT_DIV_IO_H__
+
+
+/**
+ * Local include
+ */
+#include "unitTestimplicitDiv_IO.H"
+
+
+/**
+ * Include the kernels
+ */
+#if !defined( __DRY_RUN__ )
+#include "LDU-orderedCOO-implicitDiv_kernels.H"
+#endif
+
+
+class LDUorderedCOOimplicitDiv_IO:
+  public unitTestImplicitDiv
+{
+  private:
+
+
+  public:
+
+    /**
+     * @brief Constructor for the IO object given all the parameters
+     *
+     * The name of the unit test (the searched file ) will be generated as follows:
+     *
+     *  UTname = UTdir/${name}/${prefix}_${name}_${%6.6d-index}.h5
+     *
+     * @param[in] UTdir  direcotry where the unit tests are stored
+     * @param[in] prefix prefix to be applied to the neame of the unit tests
+     * @param[in] index  index of hte unit thest
+     */
+    LDUorderedCOOimplicitDiv_IO
+    (
+      const char* outputFile,
+      const char* UTdir,
+      const char* prefix,
+      idx_k       index,
+      double      tolerance
+    ):
+      unitTestImplicitDiv(outputFile,UTdir,prefix,index,tolerance)
+    {};
+
+
+    /**
+     * @brief Destructor for the class
+     */
+    ~LDUorderedCOOimplicitDiv_IO()
+    {
+      // unitTestMatVec::~unitTestMatVec();
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief Constructor for the IO object.
+     *        Unit test dir assumed equal to "../../data"
+     *
+     * The name of the unit test (the searched file ) will be generated as follows:
+     *
+     *  UTname = UTdir/${name}/${prefix}_${name}_${%6.6d-index}.h5
+     *
+     * @param[in] prefix prefix to be applied to the neame of the unit tests
+     * @param[in] index  index of hte unit thest
+     */
+    LDUorderedCOOimplicitDiv_IO
+    (
+      const char*  prefix,
+      idx_k  index
+    ):
+      unitTestImplicitDiv
+      (
+        "test01.db",
+        "../../data/",
+        prefix,
+        index,
+        1.0E-12
+      )
+    {};
+
+
+    /**
+     * @brief Constructor for the IO object.
+     *        Index assumed equal to "0"
+     *
+     * The name of the unit test (the searched file ) will be generated as follows:
+     *
+     *  UTname = UTdir/${name}/${prefix}_${name}_${%6.6d-index}.h5
+     *
+     * @param[in] prefix prefix to be applied to the neame of the unit tests
+     * @param[in] index  index of hte unit thest
+     */
+    LDUorderedCOOimplicitDiv_IO
+    (
+      const char* prefix
+    ):
+      unitTestImplicitDiv
+      (
+        prefix,
+        0
+      )
+    {};
+
+
+    /**
+     * @brief Constructor for the IO object.
+     *        Prefix assumed equal to "LidDrivenCavity3D"
+     *
+     * The name of the unit test (the searched file ) will be generated as follows:
+     *
+     *  UTname = UTdir/${name}/${prefix}_${name}_${%6.6d-index}.h5
+     *
+     * @param[in] prefix prefix to be applied to the neame of the unit tests
+     * @param[in] index  index of hte unit thest
+     */
+    LDUorderedCOOimplicitDiv_IO
+    (
+      idx_k  index
+    ):
+      unitTestImplicitDiv
+      (
+        "LidDrivenCavity3D",
+        index
+      )
+    {};
+
+    /**
+     * @brief Empty constructor for the IO object
+     * 
+     */
+    LDUorderedCOOimplicitDiv_IO():
+      unitTestImplicitDiv
+      (
+        "LidDrivenCavity3D",
+        0
+      )
+    {};
+
+    const char* kernelFlavour() const { return( "COO_COO" ); };
+
+    /**
+     * @brief load input data for the kernel
+     */
+    void 
+    loadInputData( )
+    {
+      unitTestImplicitDiv::loadInputData();
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief load output data for the kernel
+     */
+    void 
+    loadOutputData( )
+    {
+      unitTestImplicitDiv::loadOutputData();
+      /* Exit point */
+      return;
+    };
+
+
+    void
+    Prepare()
+    {
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief allocate data on the device
+     */
+    void
+    allocateDevice()
+    {
+      unitTestImplicitDiv::allocateDevice();
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief copy data to the device
+     */
+    void
+    copyToDevice()
+    {
+      unitTestImplicitDiv::copyToDevice();
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief copy data from the device
+     */
+    void
+    copyFromDevice()
+    {
+      unitTestImplicitDiv::copyFromDevice();
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief Run the kernels 
+     *
+     * @param[in,out] profileTime time spent in the computation
+     */
+    void
+    warmup
+    (
+      timeProfile& profileTime
+    )
+    {
+      /* Start the profiling */
+      m_profiler.tic();
+      /* Call the kernel */
+#if defined( __TEST_CPU__ ) && !defined( __DRY_RUN__ )
+      LDUimplicitDivUpwind_InternalFaces_CPU
+      (
+        m_nInternalFacesInp_CPU,
+        1,
+        m_ownerInp_CPU,
+        m_neighInp_CPU,
+        m_phiInp_CPU,   // phi
+        m_diagInp_CPU,  // diag
+        m_lowerInp_CPU,
+        m_upperInp_CPU
+      );
+#endif
+
+/* Call the CUDA kernel */
+#if defined( __TEST_NATIVE_CUDA__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+/* Call the OPEN_ACC kernel */
+#if defined( __TEST_OPEN_ACC__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+    /* Call the OPEN_MP kernel */
+#if  defined( __TEST_OPEN_MP__ ) && !defined( __DRY_RUN__ )
+
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+      /* Record the profiling time */
+      m_profiler.toc( profileTime );
+      /* Exit point */
+      return;
+    };
+
+
+
+
+
+    /**
+     * @brief Run the kernels 
+     *
+     * @param[in,out] profileTime time spent in the computation
+     */
+    void
+    race
+    (
+      timeProfile& profileTime,
+      idx_k        numberOfRepetitions
+    )
+    {
+      /* Start the profiling */
+      m_profiler.tic();
+      /* Call the kernel */
+#if defined( __TEST_CPU__ ) && !defined( __DRY_RUN__ )
+      for ( idx_k i=0; i<numberOfRepetitions; ++i )
+      {
+        LDUimplicitDivUpwind_InternalFaces_CPU
+        (
+          m_nInternalFacesInp_CPU,
+          1,
+          m_ownerInp_CPU,
+          m_neighInp_CPU,
+          m_phiInp_CPU,   // phi
+          m_diagInp_CPU,  // diag
+          m_lowerInp_CPU,
+          m_upperInp_CPU
+        );
+      }
+#endif
+
+/* Call the CUDA kernel */
+#if defined( __TEST_NATIVE_CUDA__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+/* Call the OPEN_ACC kernel */
+#if defined( __TEST_OPEN_ACC__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+
+    /* Call the OPEN_MP kernel */
+#if  defined( __TEST_OPEN_MP__ ) && !defined( __DRY_RUN__ )
+      // Synchronize the device
+      cudaDeviceSynchronize();
+#endif
+      /* Record the profiling time */
+      m_profiler.toc( profileTime );
+      /* Exit point */
+      return;
+    };
+
+
+    /**
+     * @brief free memory
+     */
+    void 
+    Free()
+    {
+      unitTestImplicitDiv::Free();
+      /* Exit point */
+      return;
+    };
+
+};
+
+#endif
+
+
+
+
+
+/**
+ * In development phase, it is necessary to build a single unit test in order
+ * to be more flexible you can enable the following define and focus on only 
+ * one source file.
+ */ 
+#ifdef __SINGLE_MAIN_DEVEL__
+#include "singleTestDevel.H"
+__unitTest__( LDUorderedCOOimplicitDiv_IO );
+#endif

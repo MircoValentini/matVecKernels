@@ -30,6 +30,10 @@ INCDIR= \
 -I ./src/matVec/BlockRowPerm_sELL \
 -I ./src/matVec/CSR_CSR \
 -I ./src/matVec/CSR \
+-I ./src/implicitDiv \
+-I ./src/implicitDiv/LDU-orderedCOO \
+-I ./src/implicitDiv/MSR \
+-I ./src/implicitDiv/LDU-CSR \
 -I ${HDF5_INC}
 
 
@@ -56,6 +60,11 @@ HEADERS= \
 ./src/matVec/COO_COO/COO_COO_kernels.H \
 ./src/matVec/matVecTestFactory.H \
 ./src/matVec/unitTestMatVec_IO.H \
+./src/implicitDiv/implicitDivTestFactory.H \
+./src/implicitDiv/unitTestimplicitDiv_IO.H \
+./src/implicitDiv/LDU-orderedCOO/LDU-orderedCOO-implicitDiv_IO.H \
+./src/implicitDiv/MSR/MSR-implicitDiv_IO.H \
+./src/implicitDiv/LDU-CSR/LDU-CSR-implicitDiv_IO.H \
 ./src/unitTests.H \
 ./include/singleTestDevel.H \
 ./include/dataBase.H \

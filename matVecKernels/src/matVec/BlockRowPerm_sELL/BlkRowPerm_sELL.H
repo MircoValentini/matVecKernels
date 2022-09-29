@@ -582,29 +582,43 @@ private:
     /*
      * Construc the blocks boundaries
      */
+    idx_k last_real_upper;
+    idx_k last_theoretical_upper;
+    idx_k last_real_lower;
+    idx_k last_theoretical_lower;
+    idx_k cnt_lower;
+    idx_k cnt_upper;
     tmp = m_maxBandWidth_idx;
-    cnt=0;
+    cnt_lower=0;
     while ( tmp > 0 )
     {
-      lowerBlocksLo[cnt] = tmp;
+      lowerBlocksLo[cnt_lower] = tmp;
       idx_k blkDim = __MAX__( ceil(m_lineUpperBandWidth[tmp]*scale), limit );
       tmp -= blkDim-1;
-      lowerBlocksHi[cnt] = __MAX__( tmp, 0 );
+      lowerBlocksHi[cnt_lower] = __MAX__( tmp, 0 );
+      last_real_lower = lowerBlocksHi[cnt_lower] - lowerBlocksLo[cnt_lower] + 1;
+      last_theoretical_lower = tmp - lowerBlocksLo[cnt_lower] + 1;
       tmp--;
-      cnt++;
+      cnt_lower++;
     };
     tmp = m_maxBandWidth_idx+1;
-    cnt=0;
+    cnt_upper=0;
     while ( tmp < m_nCells )
     {
-      upperBlocksLo[cnt] = tmp;
+      upperBlocksLo[cnt_upper] = tmp;
       idx_k blkDim = __MAX__( ceil(m_lineUpperBandWidth[tmp]*scale), limit );
       tmp += blkDim-1;
-      upperBlocksHi[cnt] = __MIN__( tmp, m_nCells-1 );
+      upperBlocksHi[cnt_upper] = __MIN__( tmp, m_nCells-1 );
+      last_real_lower = lowerBlocksHi[cnt_upper] - lowerBlocksLo[cnt_upper] + 1;
+      last_theoretical_lower = tmp - lowerBlocksLo[cnt_upper] + 1;
       tmp++;
-      cnt++;
+      cnt_upper++;
     };
 
+
+    /*
+     * Handle the reminder
+     */
 
     /**
      * @brief Construct the blocking
@@ -681,6 +695,9 @@ private:
     free(lowerBlocksHi);
     free(upperBlocksLo);
     free(upperBlocksHi);
+
+    // TODO: Va gestito il resto nella dimensione dei blocchi. Se no potrebbero 
+    // esserci delle dimensini per cui il bloco di estremità ha una sola riga
 
     /* Exit point */
     return;

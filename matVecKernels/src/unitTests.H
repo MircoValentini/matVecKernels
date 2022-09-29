@@ -17,6 +17,6 @@
 
 
 #include "matVecTestFactory.H"
-
+#include "implicitDivTestFactory.H"
 
 #endif

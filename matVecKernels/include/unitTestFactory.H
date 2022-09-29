@@ -73,6 +73,7 @@ class unitTestFactory
     {
       m_kid = 255;
       if ( strcmp( m_name, "matVec" ) == 0 ) { m_kid=0;  }; /* 0  */
+      if ( strcmp( m_name, "implicitDiv" ) == 0 ) { m_kid=1;  }; /* 0  */
       bool check;
       if ( m_kid == 255 )
       {
@@ -227,7 +228,22 @@ class unitTestFactory
         {
           matVecTestFactory tmp
           (
-	    m_outputFile,
+            m_outputFile,
+            m_UTdir,
+            m_prefix,
+            m_testKind,
+            m_index,
+            m_tolerance
+          );
+          m_test = tmp.allocate();
+          m_allocated = true;
+          break;
+        }
+        case (1):
+        {
+          implicitDivTestFactory tmp
+          (
+            m_outputFile,
             m_UTdir,
             m_prefix,
             m_testKind,
