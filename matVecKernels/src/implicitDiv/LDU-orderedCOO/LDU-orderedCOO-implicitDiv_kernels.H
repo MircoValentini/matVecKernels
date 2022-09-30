@@ -36,7 +36,7 @@ LDUimplicitDivUpwind_InternalFaces_CPU
   fld_k tmp;
 
   // Main loop
-  for ( iFace=0; iFace<=nInternalFaces; iFace++ )
+  for ( iFace=0; iFace<nInternalFaces; iFace++ )
   {
     // Get the indices of the previous and the next cell
     iPrev = owner[iFace];

@@ -154,7 +154,7 @@ class LDU_CSR_implicitDiv_IO:
 
       // Allocate temporary meory needed for sorting operations
       idx_k* temporaryArray = (idx_k*)malloc( 2*nInternalFaces*sizeof(idx_k) );
-      sortItem* sortItems   = (sortItem*)malloc( 2*nInternalFaces*sizeof(sortItems) );
+      sortItem* sortItems   = (sortItem*)malloc( 2*nInternalFaces*sizeof(sortItem) );
 
       // Prepare the data structure to run the sorting algorithm
       for ( idx_k i=0; i<nInternalFaces; ++i )
