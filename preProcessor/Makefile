@@ -1,6 +1,5 @@
 .PHONY: clean
 
-
 CXXL=g++
 CXXC=g++ -c
 
@@ -18,21 +17,17 @@ RUNDIR=./run
 RM=rm -f
 LN=ln -fs
 
-
-
 #
 # Entry point
 #
-all: converter
-
+all: FOAM2H5MatConverter
 
 #
 # handles
 #
 # bench: $(RUNDIR)/benchmark.x
 
-converter: $(BINDIR)/converter.x
-
+FOAM2H5MatConverter: $(BINDIR)/FOAM2H5MatConverter
 
 #
 # Links 
@@ -40,11 +35,8 @@ converter: $(BINDIR)/converter.x
 #$(RUNDIR)/benchmark.x: $(BINDIR)/benchmark.x
 #	${LN} ../$< $@
 
-
-$(RUNDIR)/converter.x: $(BINDIR)/converter.x
+$(RUNDIR)/FOAM2H5MatConverter: $(BINDIR)/FOAM2H5MatConverter
 	${LN} ../$< $@
-
-
 
 #
 # Executables
@@ -53,7 +45,7 @@ $(RUNDIR)/converter.x: $(BINDIR)/converter.x
 #                       $(OBJDIR)/IO.o
 #	$(CXXL) $^ -o $@ -I$(HDF5_INCDIR) -L$(HDF5_LIBDIR) -lhdf5 -lm
 
-$(BINDIR)/converter.x: $(OBJDIR)/converter.o \
+$(BINDIR)/FOAM2H5MatConverter: $(OBJDIR)/converter.o \
                        $(OBJDIR)/IO.o
 	$(CXXL) $^ -o $@ -I$(HDF5_INCDIR) -L$(HDF5_LIBDIR) -lhdf5 -lm
 
@@ -94,4 +86,4 @@ $(OBJDIR)/IO.o: $(SRCDIR)/IO.C $(INCDIR)/IO.H
 #
 clean:
 	$(RM) $(OBJDIR)/*.o
-	$(RM) $(BINDIR)/*.x
+	$(RM) $(BINDIR)/*
